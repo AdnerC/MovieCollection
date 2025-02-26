@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class MovieCollection
 {
@@ -12,6 +9,12 @@ public class MovieCollection
   private Scanner scanner;
   private ArrayList<String> allCastMembers = new ArrayList<String>();
   private ArrayList<String> allGenres = new ArrayList<String>();
+  private ArrayList<Double> allRatings = new ArrayList<Double>();
+  private ArrayList<Integer> allRevs = new ArrayList<Integer>();
+
+  private ArrayList<Movie> topMoviesRatings = new ArrayList<Movie>();
+  private ArrayList<Movie> topMoviesRevs = new ArrayList<Movie>();
+
 
   public MovieCollection(String fileName)
   {
@@ -350,11 +353,55 @@ public class MovieCollection
   
   private void listHighestRated()
   {
-  
+    for (int i = 0; i < 50; i++)
+    {
+      String title = topMoviesRatings.get(i).getTitle();
+
+      // this will print index 0 as choice 1 in the results list; better for user!
+      int choiceNum = i + 1;
+
+      System.out.println("" + choiceNum + ". " + title+": "+  topMoviesRatings.get(i).getUserRating());
+    }
+
+    System.out.println("Which movie would you like to learn more about?");
+    System.out.print("Enter number: ");
+
+    int choice = scanner.nextInt();
+    scanner.nextLine();
+
+    Movie selectedMovie = topMoviesRatings.get(choice - 1);
+
+    displayMovieInfo(selectedMovie);
+
+    System.out.println("\n ** Press Enter to Return to Main Menu **");
+    scanner.nextLine();
+
   }
   
   private void listHighestRevenue()
   {
+    for (int i = 0; i < 50; i++)
+    {
+      String title = topMoviesRevs.get(i).getTitle();
+
+      // this will print index 0 as choice 1 in the results list; better for user!
+      int choiceNum = i + 1;
+
+      System.out.println("" + choiceNum + ". " + title+": $"+  topMoviesRevs.get(i).getRevenue());
+    }
+
+    System.out.println("Which movie would you like to learn more about?");
+    System.out.print("Enter number: ");
+
+    int choice = scanner.nextInt();
+    scanner.nextLine();
+
+    Movie selectedMovie = topMoviesRevs.get(choice - 1);
+
+    displayMovieInfo(selectedMovie);
+
+    System.out.println("\n ** Press Enter to Return to Main Menu **");
+    scanner.nextLine();
   
   }
   
@@ -367,7 +414,8 @@ public class MovieCollection
       String line = bufferedReader.readLine();
       
       movies = new ArrayList<Movie>();
-      
+
+
       while ((line = bufferedReader.readLine()) != null) 
       {
         String[] movieFromCSV = line.split(",");
@@ -387,6 +435,9 @@ public class MovieCollection
         String[] castMembers = cast.split("\\|");
         String[] movieGenres = genres.split("\\|");
 
+        allRatings.add(userRating);
+        allRevs.add(revenue);
+
         for (String actor : castMembers){
           if (!allCastMembers.contains(actor)){
             allCastMembers.add(actor);
@@ -399,10 +450,61 @@ public class MovieCollection
           }
         }
 
-
         Movie nextMovie = new Movie(title, cast, director, tagline, keywords, overview, runtime, genres, userRating, year, revenue);
-        movies.add(nextMovie);  
+        movies.add(nextMovie);
       }
+
+      ArrayList <Double> ratings = new ArrayList<Double>();
+      Collections.sort(allRatings);
+      for (int i =0; i<50;i++){
+        if(!ratings.contains(allRatings.get(allRatings.size()-1-i))){
+          ratings.add(allRatings.get(allRatings.size()-1-i)) ;
+        }
+      }
+
+
+      ArrayList<Movie> topMoviesRating = new ArrayList<Movie>();
+
+      for(Double rate : ratings){
+        // search through ALL movies in collection
+        for (int i = 0; i < movies.size(); i++)
+        {
+          Double movieRating = movies.get(i).getUserRating();
+
+          if (Objects.equals(rate, movieRating))
+          {
+            topMoviesRating.add(movies.get(i));
+          }
+        }
+      }
+      topMoviesRatings=topMoviesRating;
+
+
+      //REVENUE
+      ArrayList <Integer> revs = new ArrayList<Integer>();
+      Collections.sort(allRevs);
+      for (int i =0; i<50;i++){
+        if(!revs.contains(allRevs.get(allRevs.size()-1-i))){
+          revs.add(allRevs.get(allRevs.size()-1-i)) ;
+        }
+      }
+
+
+      ArrayList<Movie> topMoviesRev = new ArrayList<Movie>();
+
+      for(int rev : revs){
+        // search through ALL movies in collection
+        for (int i = 0; i < movies.size(); i++)
+        {
+          int movieRev = movies.get(i).getRevenue();
+
+          if (Objects.equals(rev, movieRev))
+          {
+            topMoviesRev.add(movies.get(i));
+          }
+        }
+      }
+      topMoviesRevs=topMoviesRev;
       bufferedReader.close();
     }
     catch(IOException exception)
